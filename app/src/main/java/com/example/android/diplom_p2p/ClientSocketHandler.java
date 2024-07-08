@@ -1,5 +1,5 @@
 
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.os.Handler;
 import android.util.Log;
@@ -21,6 +21,7 @@ public class ClientSocketHandler extends Thread {
         this.mAddress = groupOwnerAddress;
     }
 
+
     @Override
     public void run() {
         Socket socket = new Socket();
@@ -28,6 +29,7 @@ public class ClientSocketHandler extends Thread {
             socket.bind(null);
             socket.connect(new InetSocketAddress(mAddress.getHostAddress(),
                     WiFiServiceDiscoveryActivity.SERVER_PORT), 5000);
+            Log.d(TAG,"ip =" + socket.getInetAddress().toString());
             Log.d(TAG, "Launching the I/O handler");
             chat = new ChatManager(socket, handler);
             new Thread(chat).start();

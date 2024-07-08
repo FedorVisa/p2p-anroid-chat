@@ -1,4 +1,4 @@
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.Manifest;
 import android.app.Activity;
@@ -28,9 +28,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.android.wifidirect.WiFiChatFragment.MessageTarget;
-import com.example.android.wifidirect.WiFiDirectServicesList.DeviceClickListener;
-import com.example.android.wifidirect.WiFiDirectServicesList.WiFiDevicesAdapter;
+import com.example.android.diplom_p2p.WiFiChatFragment.MessageTarget;
+import com.example.android.diplom_p2p.WiFiDirectServicesList.DeviceClickListener;
+import com.example.android.diplom_p2p.WiFiDirectServicesList.WiFiDevicesAdapter;
 import com.example.app_p2p.R;
 
 
@@ -38,17 +38,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * The main activity for the sample. This activity registers a local service and
- * perform discovery over Wi-Fi p2p network. It also hosts a couple of fragments
- * to manage chat operations. When the app is launched, the device publishes a
- * chat service and also tries to discover services published by other peers. On
- * selecting a peer published service, the app initiates a Wi-Fi P2P (Direct)
- * connection with the peer. On successful connection with a peer advertising
- * the same service, the app opens up sockets to initiate a chat.
- * {@code WiFiChatFragment} is then added to the the main activity which manages
- * the interface and messaging needs for a chat session.
- */
 public class WiFiServiceDiscoveryActivity extends Activity implements
         DeviceClickListener, Handler.Callback, MessageTarget,
         ConnectionInfoListener {
@@ -62,6 +51,8 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
 
     public static final int MESSAGE_READ = 0x400 + 1;
     public static final int MY_HANDLE = 0x400 + 2;
+
+    public static final int NEW_CLIENT_CONNECTED = 0x400 + 3;
 
     private static final int PERMISSIONS_REQUEST_CODE = 1001;
 
@@ -109,14 +100,12 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
             Log.e(TAG, "Wi-Fi Direct is not supported by this device.");
             return false;
         }
-
         // Hardware capability check
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifiManager == null) {
             Log.e(TAG, "Cannot get Wi-Fi system service.");
             return false;
         }
-
         if (!wifiManager.isP2pSupported()) {
             Log.e(TAG, "Wi-Fi Direct is not supported by the hardware or Wi-Fi is off.");
             return false;
@@ -137,7 +126,6 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         return true;
     }
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,8 +152,6 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_CODE);
-            // After this point you wait for callback in
-            // onRequestPermissionsResult(int, String[], int[]) overridden method
         } else {
             startRegistrationAndDiscovery();
         }
@@ -199,7 +185,6 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         }
         super.onStop();
     }
-
     /**
      * Registers a local service and then initiates a service discovery
      */
@@ -229,51 +214,33 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     private void discoverService() {
 
         /*
-         * Register listeners for DNS-SD services. These are callbacks invoked
-         * by the system when a service is actually discovered.
+         * Register listeners for DNS-SD services.
          */
-
         manager.setDnsSdResponseListeners(channel,
-                new DnsSdServiceResponseListener() {
+                (instanceName, registrationType, srcDevice) -> {
 
-                    @Override
-                    public void onDnsSdServiceAvailable(String instanceName,
-                                                        String registrationType, WifiP2pDevice srcDevice) {
+                    if (instanceName.equalsIgnoreCase(SERVICE_INSTANCE)) {
 
-                        // A service has been discovered. Is this our app?
-
-                        if (instanceName.equalsIgnoreCase(SERVICE_INSTANCE)) {
-
-                            // update the UI and add the item the discovered
-                            // device.
-                            WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
-                                    .findFragmentByTag("services");
-                            if (fragment != null) {
-                                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
-                                        .getListAdapter());
-                                WiFiP2pService service = new WiFiP2pService();
-                                service.device = srcDevice;
-                                service.instanceName = instanceName;
-                                service.serviceRegistrationType = registrationType;
-                                adapter.add(service);
-                                adapter.notifyDataSetChanged();
-                                Log.d(TAG, "onBonjourServiceAvailable "
-                                        + instanceName);
-                            }
+                        WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
+                                .findFragmentByTag("services");
+                        if (fragment != null) {
+                            WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
+                                    .getListAdapter());
+                            WiFiP2pService service = new WiFiP2pService();
+                            service.device = srcDevice;
+                            Log.d(TAG, "onDnsSdServiceAvailable: " + service.device.deviceAddress);
+                            service.instanceName = instanceName;
+                            service.serviceRegistrationType = registrationType;
+                            adapter.add(service);
+                            adapter.notifyDataSetChanged();
+                            Log.d(TAG, "onBonjourServiceAvailable "
+                                    + instanceName);
                         }
-
                     }
-                }, new DnsSdTxtRecordListener() {
 
-                    @Override
-                    public void onDnsSdTxtRecordAvailable(
-                            String fullDomainName, Map<String, String> record,
-                            WifiP2pDevice device) {
-                        Log.d(TAG,
-                                device.deviceName + " is "
-                                        + record.get(TXTRECORD_PROP_AVAILABLE));
-                    }
-                });
+                }, (fullDomainName, record, device) -> Log.d(TAG,
+                        device.deviceName + " is "
+                                + record.get(TXTRECORD_PROP_AVAILABLE)));
 
         // After attaching listeners, create a service request and initiate
         // discovery.
@@ -314,6 +281,7 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
     public void connectP2p(WiFiP2pService service) {
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = service.device.deviceAddress;
+        Log.d(TAG, "mac = " + service.device.deviceAddress);
         config.wps.setup = WpsInfo.PBC;
         if (serviceRequest != null)
             manager.removeServiceRequest(channel, serviceRequest,
@@ -347,7 +315,6 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         switch (msg.what) {
             case MESSAGE_READ:
                 byte[] readBuf = (byte[]) msg.obj;
-                // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 Log.d(TAG, readMessage);
                 (chatFragment).pushMessage("Buddy: " + readMessage);
@@ -356,6 +323,12 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
             case MY_HANDLE:
                 Object obj = msg.obj;
                 (chatFragment).setChatManager((ChatManager) obj);
+                break;
+
+            case WiFiServiceDiscoveryActivity.NEW_CLIENT_CONNECTED:
+                ChatManager newClient = (ChatManager) msg.obj;
+                (chatFragment).pushMessage("New client connected");
+                break;
 
         }
         return true;
@@ -373,16 +346,13 @@ public class WiFiServiceDiscoveryActivity extends Activity implements
         super.onPause();
         unregisterReceiver(receiver);
     }
-
+    /*
+     * The group owner accepts connections using a server socket and then spawns
+     * a client socket for every client.
+     */
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo p2pInfo) {
         Thread handler = null;
-        /*
-         * The group owner accepts connections using a server socket and then spawns a
-         * client socket for every client. This is handled by {@code
-         * GroupOwnerSocketHandler}
-         */
-
         if (p2pInfo.isGroupOwner) {
             Log.d(TAG, "Connected as group owner");
             try {

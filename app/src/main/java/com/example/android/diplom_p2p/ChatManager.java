@@ -1,5 +1,5 @@
 
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.os.Handler;
 import android.util.Log;
@@ -34,6 +34,7 @@ public class ChatManager implements Runnable {
 
             iStream = socket.getInputStream();
             oStream = socket.getOutputStream();
+            Log.d(TAG, "run: "+ socket.getInetAddress());
             byte[] buffer = new byte[1024];
             int bytes;
             handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this)
@@ -44,7 +45,7 @@ public class ChatManager implements Runnable {
                     // Read from the InputStream
                     bytes = iStream.read(buffer);
                     if (bytes == -1) {
-                        break;
+                        continue;
                     }
 
                     // Send the obtained bytes to the UI Activity

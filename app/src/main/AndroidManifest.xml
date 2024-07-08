@@ -22,8 +22,9 @@
         android:theme="@style/Theme.app_p2p"
         tools:targetApi="31">
         <activity
-            android:name="com.example.android.wifidirect.WiFiServiceDiscoveryActivity"
+            android:name="com.example.android.diplom_p2p.WiFiServiceDiscoveryActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -1,5 +1,5 @@
 
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -18,11 +18,6 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     private Channel channel;
     private Activity activity;
 
-    /**
-     * @param manager WifiP2pManager system service
-     * @param channel Wifi p2p channel
-     * @param activity activity associated with the receiver
-     */
     public WiFiDirectBroadcastReceiver(WifiP2pManager manager, Channel channel,
             Activity activity) {
         super();
@@ -45,15 +40,12 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                     .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
 
             if (networkInfo.isConnected()) {
-
-                // we are connected with the other device, request connection
-                // info to find group owner IP
                 Log.d(WiFiServiceDiscoveryActivity.TAG,
                         "Connected to p2p network. Requesting network details");
                 manager.requestConnectionInfo(channel,
                         (ConnectionInfoListener) activity);
             } else {
-                // It's a disconnect
+
             }
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION
                 .equals(action)) {

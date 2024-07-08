@@ -1,5 +1,5 @@
 
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -43,16 +43,12 @@ public class WiFiChatFragment extends Fragment {
                 items);
         listView.setAdapter(adapter);
         view.findViewById(R.id.button1).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View arg0) {
-                        if (chatManager != null) {
-                            chatManager.write(chatLine.getText().toString());
-                            pushMessage("Me: " + chatLine.getText().toString());
-                            chatLine.setText("");
-                            chatLine.clearFocus();
-                        }
+                arg0 -> {
+                    if (chatManager != null) {
+                        chatManager.write(chatLine.getText().toString());
+                        pushMessage("Me: " + chatLine.getText().toString());
+                        chatLine.setText("");
+                        chatLine.clearFocus();
                     }
                 });
 
@@ -65,6 +61,8 @@ public class WiFiChatFragment extends Fragment {
         });
         return view;
     }
+
+
 
     public interface MessageTarget {
         public Handler getHandler();

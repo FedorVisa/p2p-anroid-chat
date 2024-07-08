@@ -16,8 +16,9 @@
             android:id="@+id/textViewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="64dp"
+            android:layout_marginStart="48dp"
             android:text="@string/name"
+            android:layout_gravity="center"
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -26,31 +27,14 @@
             android:id="@+id/imageViewSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
+            android:layout_gravity="top|start|center"
             android:layout_marginStart="8dp"
+            android:background="@null"
             android:src="@drawable/menu"
             app:tint="@android:color/white" />
 
-        <ImageButton
-            android:id="@+id/load_old_messages_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_gravity="top|end"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/menu"
-            app:tint="@android:color/white" />
 
-        <ImageButton
-            android:id="@+id/delete_all_messages_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_gravity="top|end"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="64dp"
-            android:src="@drawable/menu"
-            app:tint="@android:color/white" />
+
 
     </RelativeLayout>
 

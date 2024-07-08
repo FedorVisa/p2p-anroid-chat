@@ -1,4 +1,4 @@
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.content.Context;
 import android.util.Log;

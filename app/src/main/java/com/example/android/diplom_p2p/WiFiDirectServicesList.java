@@ -1,5 +1,5 @@
 
-package com.example.android.wifidirect;
+package com.example.android.diplom_p2p;
 
 import android.app.ListFragment;
 import android.content.Context;
@@ -18,9 +18,8 @@ import java.util.List;
 import com.example.app_p2p.R;
 
 
-/**
- * A simple ListFragment that shows the available services as published by the
- * peers
+/*
+  ListFragment that shows the available services as published by the peers
  */
 public class WiFiDirectServicesList extends ListFragment {
 
@@ -47,7 +46,7 @@ public class WiFiDirectServicesList extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO Auto-generated method stub
+
         ((DeviceClickListener) getActivity()).connectP2p((WiFiP2pService) l
                 .getItemAtPosition(position));
         ((TextView) v.findViewById(android.R.id.text2)).setText("Connecting");
